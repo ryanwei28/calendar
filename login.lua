@@ -16,7 +16,8 @@ local networkListener
 local removeTextField
 local admin
 local fgdpass
- 
+local accountBg
+local passwordBg
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
@@ -25,31 +26,28 @@ local fgdpass
      
     --介面
     ------------------------------------------------------------------------------------------
-    bg = display.newRect( _parent , 160 , 320 , 320 , 640 )
+    bg = display.newImageRect( _parent , "images/loginBg.jpg" , SCREEN.W , SCREEN.H )
+    bg.x , bg.y = SCREEN.CX , SCREEN.CY
     bg:setFillColor( 0.9 )
 
-    logo = display.newCircle( _parent , 120 , 100 , 80 )
-    logo:setFillColor( 0.5 )
-    logo.x , logo.y = 160 , 140
+    logo = display.newImageRect( _parent, "images/logo.png", SCREEN.W * 0.5 , SCREEN.W * 0.5 )
+    logo.x , logo.y = SCREEN.CX , SCREEN.CY * 0.6
 
-    logo_text = display.newText( _parent , "公司LOGO" , 160 , 140, font , 30 )
+    login = display.newImageRect( _parent, "images/login.png", SCREEN.W * 0.73 , SCREEN.H * 0.16 )
+    login.x , login.y =  SCREEN.CX , SCREEN.CY * 1.3 
 
-    login = display.newRect( _parent , 160 , 460 , 100 , 40 )
-    login:setFillColor( 0.6 )
+    accountBg = display.newImageRect( _parent , "images/account.png",  SCREEN.W * 0.8 , SCREEN.H * 0.16 )
+    accountBg.x , accountBg.y = SCREEN.CX  , SCREEN.CY
 
-    login_text = display.newText( _parent , "登入", 160 , 460 , font , 20 )
+    -- passwordBg = display.newImageRect( _parent , "images/account.png",  SCREEN.W * 0.5 , SCREEN.H * 0.08 )
+    -- passwordBg.x , passwordBg.y = SCREEN.CX * 1.1  , SCREEN.CY*1.4
 
-    account = display.newText( _parent , "帳號", 50 , 280 , font , 25 )
-    account:setFillColor( 0.8 , 0.5 , 0 )
+    account_textField = native.newTextField( SCREEN.CX * 1.14  , SCREEN.CY *0.93 , SCREEN.W * 0.6 , SCREEN.H * 0.07 )
+    account_textField.hasBackground = false
 
-    password = display.newText( _parent , "密碼", 50 , 340 , font , 25 )
-    password:setFillColor( 0.8 , 0.5 , 0 )
-
-    account_textField = native.newTextField( 180 , 280 , 160 , 50 )
-    password_textField = native.newTextField( 180 , 340 , 160 , 50 )
+    password_textField = native.newTextField( SCREEN.CX * 1.14  , SCREEN.CY *1.07 , SCREEN.W * 0.6 , SCREEN.H * 0.07 )
+    password_textField.hasBackground = false
     password_textField.isSecure = true
-    password_textField.size = 20
-
 
     login:addEventListener( "tap", function (  )
         admin = account_textField.text 
@@ -79,6 +77,7 @@ local fgdpass
 networkListener = function ( e )
      if ( e.isError ) then
         print( "Network error: ", e.response )
+        -- native.showAlert( "網路錯誤", "請確定您的網路連線狀態", { "OK" })
     else
         print ( "RESPONSE: " .. e.response )
         data = json.decode( e.response ) 

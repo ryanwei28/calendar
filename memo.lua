@@ -31,6 +31,9 @@ local clearNetwork
 local clearNetworkListener
 local readDataCallback
 local contentText
+local scrollView_bg
+local contentBg 
+local dateBg
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
@@ -38,29 +41,40 @@ local contentText
  
 init = function ( _parent )
     print( memo_date )
-    bg = display.newRect( _parent , 160 , 180, 320, 380 )
-    bg:setFillColor( 0.7 , 0.82 , 0.9 )
-    added = display.newCircle( _parent , 60, 450, 40 )
-    clear = display.newCircle( _parent , 160 , 450 , 40 )
-    back = display.newCircle( _parent, 260, 450, 40 )
-    submitted = display.newCircle( _parent, 280 , 50 , 20 )
-    modify = display.newCircle( _parent , 100 , 450 , 20 )
+    bg = display.newImageRect( _parent, "images/memoBg.jpg", SCREEN.W , SCREEN.H )
+    bg.x , bg.y = SCREEN.CX , SCREEN.CY 
+    added = display.newImageRect( _parent, "images/create.png", SCREEN.W * 0.2 , SCREEN.W * 0.2 )
+    added.x , added.y = SCREEN.CX * 0.25 , SCREEN.CY * 1.8
+    modify = display.newImageRect( _parent, "images/modify.png", SCREEN.W * 0.2 , SCREEN.W * 0.2 )
+    modify.x , modify.y = SCREEN.CX * 0.75 , SCREEN.CY * 1.8   
+    clear = display.newImageRect( _parent, "images/delete.png", SCREEN.W * 0.2 , SCREEN.W * 0.2 )
+    clear.x , clear.y = SCREEN.CX * 1.25 , SCREEN.CY * 1.8
+    back = display.newImageRect( _parent, "images/back.png", SCREEN.W * 0.2 , SCREEN.W * 0.2 )
+    back.x , back.y = SCREEN.CX * 1.75 , SCREEN.CY * 1.8    
+    submitted = display.newImageRect( _parent, "images/submit.png", SCREEN.W * 0.18 , SCREEN.W * 0.18 )
+    submitted.x , submitted.y = SCREEN.CX * 1.72  , SCREEN.CY * 0.29
+    -- scrollView_bg = display.newRect( _parent, 160 , 240 , 320 , 480 )
+    -- scrollView_bg.alpha = 0
 
-    addedText = display.newText( _parent, "新增", 60, 450, font , 25)
-    addedText:setFillColor( 0.3 )
-    clearText = display.newText( _parent, "清除", 160, 450, font , 25)
-    clearText:setFillColor( 0.3 )
-    baclText = display.newText( _parent, "返回", 260, 450, font , 25)
-    baclText:setFillColor( 0.3 )
-    submittedText = display.newText( _parent , "提交", 280 , 50 , font , 20 )
-    submittedText:setFillColor( 0.3 )
-    contentText = display.newText(  _parent , "" , 40 , 100 ,250 , 600 , font , 20 )
-    contentText:setFillColor( 0.2 )
+    contentBg = display.newImageRect( _parent, "images/contentBg.png", SCREEN.W , SCREEN.H * 0.6 )
+    contentBg.x , contentBg.y = SCREEN.CX , SCREEN.CY *1.05
+    dateBg = display.newImageRect( _parent, "images/date.png", SCREEN.W *0.7, SCREEN.H * 0.12 )
+    dateBg.x , dateBg.y = SCREEN.CX * 0.75 , SCREEN.CY * 0.29
+    -- addedText = display.newText( _parent, "新增", SCREEN.CX * 0.25, SCREEN.CY * 1.8 , font , 50)
+    -- addedText:setFillColor( 0.3 )
+    -- clearText = display.newText( _parent, "清除", SCREEN.CX * 1.25, SCREEN.CY * 1.8, font , 50)
+    -- clearText:setFillColor( 0.3 )
+    -- baclText = display.newText( _parent, "返回", SCREEN.CX * 1.75, SCREEN.CY * 1.8, font , 50)
+    -- baclText:setFillColor( 0.3 )
+    -- submittedText = display.newText( _parent , "提交",SCREEN.CX*1.72  , SCREEN.CY * 0.2 , font , 50 )
+    -- submittedText:setFillColor( 0.3 )
+    contentText = display.newText(  _parent , "" , SCREEN.CX * 0.25 , SCREEN.CY * 0.1 ,SCREEN.W * 0.8 , SCREEN.H * 1.5 , font , 50 )
+    contentText:setFillColor( 0.9 )
     contentText.anchorX = 0
     contentText.anchorY = 0
 
-    numText = display.newText( _parent, memo_date, 100, 50 , font , 30 )
-    numText:setFillColor( 0.2 )
+    numText = display.newText( _parent, memo_date, SCREEN.CX * 0.75 , SCREEN.CY * 0.29 , font , 90 )
+    numText:setFillColor( 0.1 )
 
     added:addEventListener( "tap", addedListener )
     back:addEventListener( "tap", backListener )
@@ -71,24 +85,25 @@ init = function ( _parent )
     -- submitted:addEventListener( "tap", submittedListener )
 
     -- Create image sheet for custom scroll bar
-    local scrollBarOpt = {
-        width = 20,
-        height = 20,
-        numFrames = 3,
-        sheetContentWidth = 20,
-        sheetContentHeight = 60
-    }
+    -- local scrollBarOpt = {
+    --     width = 20,
+    --     height = 20,
+    --     numFrames = 3,
+    --     sheetContentWidth = 20,
+    --     sheetContentHeight = 60
+    -- }
     -- local scrollBarSheet = graphics.newImageSheet( "scrollBar.png", scrollBarOpt )
      
     -- Create the widget
     scrollView = widget.newScrollView(
         {
-            top = 0,
+            top = SCREEN.CY * 0.5 ,
             left = 0,
-            width = 320,
-            height = 380,
-            scrollWidth = 600,
-            scrollHeight = 800,
+            width = SCREEN.W,
+            height = SCREEN.H * 0.55,
+            scrollWidth = SCREEN.W,
+            scrollHeight = SCREEN.H * 2 ,
+            backgroundColor = { 0.9, 0.9, 0.9 ,0} ,
             listener = scrollListener,
             horizontalScrollDisabled = true ,
             scrollBarOptions = {
@@ -101,11 +116,7 @@ init = function ( _parent )
     )
     
     _parent:insert( scrollView )
-    -- Create a image and insert it into the scroll view
-    scrollView:insert( bg )
-    scrollView:insert( numText )
-    scrollView:insert( submitted )
-    scrollView:insert( submittedText )
+    -- scrollView:insert( contentBg )
     scrollView:insert( contentText )
 
     readData()
@@ -139,15 +150,17 @@ networkRequset = function (  )
     print( "params.body: "..encodeData )
 
     network.request( "http://localhost:8080/fgd-api/create", "POST", networkListener,params)
-
+    native.setActivityIndicator( true )
 end
 
 --新增資料 network callback
 networkListener = function( event )
     if ( event.isError ) then
         print( "Network error: ", event.response )
+        native.showAlert( "網路錯誤", "請確定您的網路連線狀態", { "OK" })
     else
         readData()
+        native.setActivityIndicator( false )
         native.showAlert( "success", "上傳成功！" , {"確定"} )
         print ( "RESPONSE: " .. event.response )
     end
@@ -156,21 +169,24 @@ end
 --修改資料 modify network 
 modifyNetwork = function ( )
     local host = "http://localhost:8080/fgd-api/"
-    local func = "add_data/"
+    local func = "modifyData/"
     local user_id = user_id.."/"
     local date = memo_date.."/"
     local content = content
     local URL = host..func..user_id..date..content
     print( URL )
     network.request( URL , "GET", modifyNetworkListener)
+    native.setActivityIndicator( true )
 end
 
 --修改資料 modify callbacl
 modifyNetworkListener = function( event )
     if ( event.isError ) then
         print( "Network error: ", event.response )
+        native.showAlert( "網路錯誤", "請確定您的網路連線狀態", { "OK" })
     else
         readData()
+        native.setActivityIndicator( false )
         native.showAlert( "success", "修改成功！" , {"確定"} )
         print ( "RESPONSE: " .. event.response )
     end
@@ -179,19 +195,22 @@ end
 --刪除資料 network
 clearNetwork = function (  )
     local host = "http://localhost:8080/fgd-api/"
-    local func = "delete_data/"
+    local func = "deleteData/"
     local user_id = user_id.."/"
     local date = memo_date
     local URL = host..func..user_id..date
     print( URL )
     network.request( URL , "GET", clearNetworkListener)
+    native.setActivityIndicator( true )
 end
 
 --刪除資料 callback
 clearNetworkListener = function ( event )
      if ( event.isError ) then
         print( "Network error: ", event.response )
+        native.showAlert( "網路錯誤", "請確定您的網路連線狀態", { "OK" })
     else
+        native.setActivityIndicator( false )
         native.showAlert( "success", "刪除成功！" , {"確定"} )
         print ( "RESPONSE: " .. event.response )
     end
@@ -223,7 +242,7 @@ end
 readData = function (  )
     
     local host = "http://localhost:8080/fgd-api/"
-    local func = "read_Data/"
+    local func = "readData/"
     local user_id = user_id.."/"
     local date = memo_date
     -- local content = content
@@ -233,9 +252,11 @@ readData = function (  )
   
 end
 
+--讀取資料庫資料 callback 
 readDataCallback = function ( event )
     if ( event.isError ) then
         print( "Network error: ", event.response )
+        native.showAlert( "網路錯誤", "請確定您的網路連線狀態", { "OK" })
     else
         local data = json.decode( event.response )
         if (data.content) then
@@ -244,6 +265,7 @@ readDataCallback = function ( event )
         print ( "RESPONSE: " .. event.response )
     end
 end
+
 --modifyListener
 modifyListener = function (  )
     if (contentText.text == "") then
@@ -265,12 +287,10 @@ addedListener = function (  )
     end
 end
 
-
-
 --新增資料
 inputDataFun = function (  )
-    newTextBox = native.newTextBox( 160 , 290 , 300 , 420 )
-    newTextBox.size = 20
+    newTextBox = native.newTextBox( SCREEN.CX , SCREEN.CY * 1.2 , SCREEN.W , SCREEN.H*0.8 )
+    newTextBox.size = 50
     newTextBox.isEditable = true
     newTextBox:addEventListener( "userInput", textListener  )
     submitted:addEventListener( "tap", submittedListener )
@@ -290,6 +310,7 @@ clearListener = function ( e )
     end
 end
 
+--提交 listener
 submittedListener = function ( ... )
     print( "submitted" )
     print( newTextBox.text )
@@ -298,7 +319,7 @@ submittedListener = function ( ... )
     content = inputData
 
     if (inputType == "add") then
-      networkRequset()
+        networkRequset()
     elseif (inputType == "modify") then
         modifyNetwork()
     end

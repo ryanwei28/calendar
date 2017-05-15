@@ -35,8 +35,18 @@ local weekData = {
     "(五)" ,
     "(六)" ,
     }
+local rowBgData = {
+    "images/sat.png" ,
+    "images/mon.png" ,
+    "images/mon.png" ,
+    "images/mon.png" ,
+    "images/mon.png" ,
+    "images/mon.png" ,
+    "images/sat.png" ,
+    }
 local month_Days = { 31, 28 , 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 local yearData = {2014,2015,2016,2017,2018,2019,2020}
+local bg
 -- -----------------------------------------------------------------------------------
 -- Code outside of the scene event functions below will only be executed ONCE unless
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
@@ -45,25 +55,27 @@ local yearData = {2014,2015,2016,2017,2018,2019,2020}
  init = function ( _parent )
 
     -- Set up the picker wheel columns
+    bg = display.newImageRect( _parent, "images/memoBg.jpg", SCREEN.W , SCREEN.H )
+    bg.x , bg.y = SCREEN.CX , SCREEN.CY
     local columnData = 
     { 
         { 
-            align = "left",
-            width = 124,
+            align = "center",
+            width = SCREEN.W * 0.3 ,
             labelPadding = 20,
             startIndex = 4,
             labels = { "2014","2015","2016","2017", "2018", "2019", "2020" }
         },
         {
-            align = "left",
-            width = 96,
+            align = "center",
+            width = SCREEN.W * 0.35,
             labelPadding = 10,
             startIndex = month,
             labels = { "一月", "二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月", }
         },
         {
-            align = "left",
-            width = 60,
+            align = "center",
+            width = SCREEN.W * 0.3,
             labelPadding = 10,
             startIndex = day,
             labels = { "1", "2", "3", "4", "5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31" }
@@ -75,15 +87,15 @@ local yearData = {2014,2015,2016,2017,2018,2019,2020}
     pickerWheel = widget.newPickerWheel(
     {
         x = display.contentCenterX,
-        top = display.contentHeight -50,
+        top = display.contentHeight - SCREEN.H * 0.12,
         columns = columnData,
         style = "resizable",
         width = display.contentWidth,
-        height = 40 ,
-        rowHeight = 20,
+        height = SCREEN.H * 0.11 ,
+        rowHeight = SCREEN.H * 0.05,
         fontColorSelected = fontColorSelected ,
         onValueSelected = onValueSelected ,
-        fontSize = 14
+        fontSize = 40
     })
      
 
@@ -91,6 +103,7 @@ local yearData = {2014,2015,2016,2017,2018,2019,2020}
     _parent:insert( pickerWheelGroup )
     pickerWheelGroup:insert( pickerWheel )
 
+    native.setActivityIndicator( true )
     calculateNetworkReq()
 end
  
@@ -134,7 +147,7 @@ end
 
 --Value Selected Listener 
 onValueSelected = function ( e )
-
+    native.setActivityIndicator( true )
     tableView:removeSelf( )
     if (e.column == 1) then
         year = yearData[e.row]
@@ -150,7 +163,6 @@ onValueSelected = function ( e )
     calculateNetworkReq()
     -- createTableView()
     -- y = string.sub(year,3,4)
-
 end
 
 --建立tableView
@@ -160,9 +172,10 @@ createTableView = function (  )
      tableView = widget.newTableView(
         {
             left = 0,
-            top = -20,
-            height = 455,
-            width = 320,
+            top = SCREEN.CY * 0.16,
+            height = SCREEN.H * 0.8 ,
+            width = SCREEN.W,
+            isLocked = true ,
             onRowRender = onRowRender,
             onRowTouch = onRowTouch,
             listener = scrollListener
@@ -171,8 +184,8 @@ createTableView = function (  )
  
     -- Insert 7 rows
     for i = 1, 7 do
-        local rowHeight = 65
-        local rowColor = { default={0.75,0.95,0.8}, over={1,0.5,0,0.2} }
+        local rowHeight = SCREEN.H * 0.11
+        local rowColor = { default={1,1,1}, over={1,0.5,0,0.2} }
         local lineColor = { 0.1, 0.5, 0.5 }
         -- Insert a row into the tableView
         tableView:insertRow(
@@ -200,7 +213,7 @@ end
 networkRequset = function ( row )
     
     local host = "http://localhost:8080/fgd-api/"
-    local func = "read_Data/"
+    local func = "readData/"
     local user_id = user_id.."/"
     local date = year..string.format( "%02d" , cal_month_num)..string.format( "%02d" , cal_day_num)
     local URL = host..func..user_id..date
@@ -212,6 +225,7 @@ end
 requestCallback = function ( event )
       if ( event.isError ) then
         print( "Network error: ", event.response )
+        native.showAlert( "網路錯誤", "請確定您的網路連線狀態", { "OK" })
     else
         local data = json.decode( event.response )
         
@@ -227,6 +241,7 @@ requestCallback = function ( event )
         if ( i == 7 ) then
             i = 0
             createTableView()
+            native.setActivityIndicator( false )
         end
     end
 end
@@ -276,7 +291,7 @@ onRowRender = function ( event )
   
     local row = event.row
    
-    day_num = day - 1 + row.index --+ swipeNum * 7
+    day_num = day - 1 + row.index 
     month_num = month
     print( month..row.index )
 
@@ -299,23 +314,24 @@ onRowRender = function ( event )
         month_num = 1
     end
 --=======================================================================
-    local calendar_date = display.newText( row, month_num.."/"..day_num, 42 , 35,  font , 20 )
-    calendar_date:setFillColor( 0.4 )
-    -- networkRequset()
     
-
     local week_num = week + row.index 
    
     if (week_num) > 7 then
         week_num = week + row.index -7
     end
-    
-    local re_date = display.newText( row, decode_data[row.index].content, 120 , 40, 180 , 35 , font , 15 )
-    re_date:setFillColor( 0.5,0.7,0.1 )
+
+    local rowBg = display.newImageRect( row , rowBgData[week_num], SCREEN.W , SCREEN.H * 0.138 )
+    rowBg.x , rowBg.y = SCREEN.CX , SCREEN.CY * 0.1
+    rowBg.alpha = 0.7
+    local re_date = display.newText( row, decode_data[row.index].content, SCREEN.CX * 0.75 , SCREEN.CY *0.12 , SCREEN.W * 0.55  , SCREEN.H *0.07 , font , 35 )
+    re_date:setFillColor( 0 )
     re_date.anchorX = 0 
    
+    local calendar_date = display.newText( row, month_num.."/"..day_num, SCREEN.CX * 0.22 , SCREEN.CY * 0.12 ,  font , 60 )
+    calendar_date:setFillColor( 0.4 )
 
-    local calendar_week = display.newText( row, weekData[week_num], 80 , 35 , font , 20 )
+    local calendar_week = display.newText( row, weekData[week_num], SCREEN.CX * 0.5 , SCREEN.CY * 0.12 , font , 45 )
     calendar_week:setFillColor( 0.45 )  
 
     k = k +1 
@@ -349,8 +365,6 @@ onRowTouch = function ( e )
                 month_num = 1
             end
 
-
-        -- print(e.row.index)
         judge_d = string.sub(memo_date , -2 , -1)
         judge_m = string.sub(memo_date , -5 , -4)
         judge_d = judge_d + e.row.index - 1
@@ -377,17 +391,7 @@ onRowTouch = function ( e )
         composer.setVariable( "num" , e.row.index )
         composer.setVariable( "memo_date", memo_date )
         composer.gotoScene( "memo" )
-
-    -- elseif (e.phase == "swipeLeft") then
-    --     print( "Left" )
-    --     transition.to( tableView , { x = -640 , t = 100 , onComplete = createTableView} )
-    --     swipeNum = swipeNum + 1
-    -- elseif (e.phase == "swipeRight") then
-    --     transition.to( tableView , { x = 640 , t = 100 , onComplete = createTableView} )
-    --     swipeNum = swipeNum - 1
-    --     print( "Right" )
     end
-    
 end
 
  --取一个数的整数部分
